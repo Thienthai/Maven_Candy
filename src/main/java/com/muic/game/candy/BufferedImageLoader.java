@@ -4,6 +4,8 @@ import javax.imageio.ImageIO;
 import java.awt.image.BufferedImage;
 import java.io.IOException;
 
+// Used for load image for the specific path
+
 public class BufferedImageLoader {
     private BufferedImage image;
 

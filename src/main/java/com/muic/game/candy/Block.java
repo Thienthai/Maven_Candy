@@ -1,5 +1,7 @@
 package com.muic.game.candy;
 
+// For setting characteristic of the block in each cell
+
 public class Block {
 
     private int x = 0;
@@ -64,7 +66,8 @@ public class Block {
         this.value = value;
     }
 
-    private int[] getPosition(int x,int y){
+    // List position of the low and col that can be call when we want to change the position easier
+    public int[] getPosition(int x,int y){
         int[] a = new int[2];
         if(x == 0){a[0] = 31;}
         if(x == 1){a[0] = 31+90;}
