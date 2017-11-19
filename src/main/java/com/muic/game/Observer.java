@@ -2,7 +2,9 @@ package com.muic.game;
 
 import com.muic.game.candy.Block;
 import com.muic.game.candy.Point;
+import com.muic.game.logic.Score;
 
+import java.awt.*;
 import java.util.ArrayList;
 import java.util.Random;
 
@@ -11,24 +13,31 @@ import java.util.Random;
 public class Observer {
 
     Block[][] board;
+    Score v_score; // this is the score of view board
 
-    public Observer(Block[][] board){
+    public Observer(Block[][] board, Score score){
+
         this.board = board;
+        this.v_score = score;
     }
 
     // This will create random cell and have transition from the upper
     public void randomBlock(int row,int col){
 
-        // make the block to appear jus in case
-        board[row][col].setNull(false);
-
         Random r = new Random();
 
-        // set a new random number for
-        board[row][col].setValue(r.nextInt(4) + 1);
+        // Create an instance of block
+        Block b = new Block(col,row,r.nextInt(4) + 1);
 
+        // assign it to the view board
+        board[row][col] = b;
+
+        //set the slide point to specific the board position of each block
+        board[row][col].setSlidepoint(new Point(b.getX(),b.getY()));
+
+        // set the current position to be outside so that it will create a good transition
         board[row][col].setX(board[row][col].getX());
-        board[row][col].setY(-100);
+        board[row][col].setY(-500);
 
     }
 
@@ -43,11 +52,37 @@ public class Observer {
         board[des_row][des_col].setX(point[0]);
         board[des_row][des_col].setY(point[1]);
 
+        point = board[des_row][des_col].getPosition(des_col,des_row);
+
+        board[ori_row][ori_col].setX(point[0]);
+        board[ori_row][ori_col].setY(point[1]);
+
+        int num1 = board[ori_row][ori_col].getValue(); // save the value of origin
+        int num2 = board[des_row][des_col].getValue(); // save the value of destination
+        board[des_row][des_col].setValue(num1);
+        board[ori_row][ori_col].setValue(num2);
+
     }
 
     //set specific block to null or not null
     public void setNull(int row,int col,boolean b){
         board[row][col].setNull(b);
+    }
+
+    public void setValue(int row,int col,int value){
+
+        // Create an instance of block
+        Block b = new Block(col,row,value);
+
+        // assign it to the view board
+        board[row][col] = b;
+
+        //set the slide point to specific the board position of each block
+        board[row][col].setSlidepoint(new Point(b.getX(),b.getY()));
+    }
+
+    public void setScore(Score score){
+        v_score.setScore(score.getScore());
     }
 
 

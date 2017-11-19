@@ -26,18 +26,11 @@ public class ModBoard {
         for(int i = 0 ;i < 6;i++){
             for(int j = 0;j < 6;j++){
                 board[i][j] = new ArrayList<Integer>();
-                board[i][j].add(r.nextInt(4) + 1);
+                int num = r.nextInt(4) + 1;
+                board[i][j].add(num);
+                os.setValue(i,j,num); // set value of view board
             }
         }
-
-        // testing for dup initalize
-        board[5][3].clear();
-        board[5][4].clear();
-        board[5][5].clear();
-
-        board[5][3].add(4);
-        board[5][4].add(4);
-        board[5][5].add(4);
 
         int dup_num = 1;
         // Check from left to right in horizontal first
@@ -64,7 +57,7 @@ public class ModBoard {
                         num = r.nextInt(4)+1;
                     }
                     board[i][j].add(num); // assign the random new one
-
+                    os.setValue(i,j,num); // set value of view board
 
                 }
 
@@ -95,6 +88,7 @@ public class ModBoard {
                         num = r.nextInt(4)+1;
                     }
                     board[i][j].add(num); // create the new random one
+                    os.setValue(i,j,num); // set value of view board
 
                 }
 
@@ -148,6 +142,9 @@ public class ModBoard {
                         //set the upper position to be equal to 0
                         board[i - 1][j].clear();
                         board[i - 1][j].add(0);
+                        os.setNull(i,j,false);
+                        os.setNull(i-1,j,false);
+                        os.movePosition(i,j,i-1,j);
 
                     }
 
@@ -158,7 +155,10 @@ public class ModBoard {
 
                         // set the position to be the random number bwtween 1 - 4
                         board[i][j].clear();
-                        board[i][j].add(r.nextInt(4) + 1);
+                        int num = r.nextInt(4) + 1; // random new number
+                        board[i][j].add(num);
+                        os.setNull(i,j,false);
+                        os.setValue(i,j,num);
 
                     }
 
@@ -203,6 +203,7 @@ public class ModBoard {
                     // we will start to set null if more than or equal to three
                     if (dup_num >= 3) {
                         score.setScore(score.getScore() + 100); // adding the score when we see duplication
+                        os.setScore(score); // use to set score for view class
 
                         dup_complete = false; // see dup occur so we still not complete
 
@@ -210,6 +211,7 @@ public class ModBoard {
                         {
                             col_Board[i - ((dup_num - k) - 1)][j].clear();
                             col_Board[i - ((dup_num - k) - 1)][j].add(0);
+                            os.setNull(i - ((dup_num - k) - 1),j,true);
                         }
                     }
                 }
@@ -242,12 +244,14 @@ public class ModBoard {
                     // we will start to set null if more than or equal to three
                     if (dup_num >= 3) {
                         score.setScore(score.getScore() + 100); // adding the score when we see duplication
+                        os.setScore(score); // use to set score for view class
                         dup_complete = false; // see dup occur so we still not complete
 
                         for (int k = 0; k < dup_num; k++) //loop back to the previous dup_num times and set it all to 0
                         {
                             row_Board[i][j - ((dup_num - k) - 1)].clear();
                             row_Board[i][j - ((dup_num - k) - 1)].add(0);
+                            os.setNull(i,j - ((dup_num - k) - 1),true);
                         }
                     }
                 }
@@ -287,45 +291,53 @@ public class ModBoard {
     //swap the cell from origin to destination
     public boolean swapBoard(ArrayList<Integer>[][] board,int origin_row, int origin_col,int des_row,int des_col){
 
-        // cross out since we need to inplement another input for gui
-//        // get input from the user
-//        BufferedReader br = new BufferedReader(new InputStreamReader(System.in));
-//        System.out.println("Select origin row that you want to swap: ");
-//        int origin_row = Integer.parseInt(br.readLine());
-//        System.out.println("Select origin col that you want to swap: ");
-//        int origin_col = Integer.parseInt(br.readLine());
-//        System.out.println("Select destination row that you want to swap: ");
-//        int des_row = Integer.parseInt(br.readLine());
-//        System.out.println("Select destination col that you want to swap: ");
-//        int des_col = Integer.parseInt(br.readLine());
-
         // list of position of origin is possible
         boolean false1 = (origin_col == des_col && origin_row == des_row + 1);
         boolean false2 = (origin_col == des_col && origin_row == des_row - 1);
-        boolean false3 = (origin_row == des_row && origin_row == des_col + 1);
-        boolean false4 = (origin_row == des_row && origin_row == des_col - 1);
+        boolean false3 = (origin_row == des_row && origin_col == des_col + 1);
+        boolean false4 = (origin_row == des_row && origin_col == des_col - 1);
 
-        // if it true either one of the four the position is legit else it is not and we will not swap
-        if(false1 || false2 || false3 || false4){
-            int bufferInt_Origin = board[origin_row][origin_col].get(0); // keep the origin candy
-            int bufferInt_Des = board[des_row][des_col].get(0); // keep the destination candy
-
-            // delete the specific array to add new
-            board[origin_row][origin_col].clear();
-            board[des_row][des_col].clear();
-
-            // swap the candy
-            board[origin_row][origin_col].add(bufferInt_Des);
-            board[des_row][des_col].add(bufferInt_Origin);
-            return true;
-        }else {
-
-            System.out.println("FALSE POSITION NO SWAP");
+        // need to implement quick return incase they didn't press any condition above
+        if(!false1 && !false2 && !false3 && !false4){
+            System.out.println("FALSE POSITION OR NO POSITION OCCUR NO SWAP");
             System.out.println(" ");
             System.out.println(" ");
             return false;
         }
 
+        // do the process to swap the postion
+
+        int bufferInt_Origin = board[origin_row][origin_col].get(0); // keep the origin candy
+        int bufferInt_Des = board[des_row][des_col].get(0); // keep the destination candy
+
+        // delete the specific array to add new
+        board[origin_row][origin_col].clear();
+        board[des_row][des_col].clear();
+
+        // swap the candy
+        board[origin_row][origin_col].add(bufferInt_Des);
+        board[des_row][des_col].add(bufferInt_Origin);
+
+        // change the board view
+        os.movePosition(origin_row,origin_col,des_row,des_col);
+
+        // if it true either one of the four the position is legit else it is not and we will not swap
+        if((false1 || false2 || false3 || false4) && isDup(board)){
+            return true;
+        }else {
+            System.out.println("FALSE POSITION OR NO POSITION OCCUR NO SWAP");
+            System.out.println(" ");
+            System.out.println(" ");
+            // delete the specific array to add new
+            board[origin_row][origin_col].clear();
+            board[des_row][des_col].clear();
+
+            // swap the candy
+            board[origin_row][origin_col].add(bufferInt_Origin);
+            board[des_row][des_col].add(bufferInt_Des);
+            os.movePosition(origin_row,origin_col,des_row,des_col); // move back to the previous position
+            return false;
+        }
     }
 
     // To check is it have duplication in the board or not

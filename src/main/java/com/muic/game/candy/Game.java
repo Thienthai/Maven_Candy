@@ -50,9 +50,13 @@ public class Game extends Canvas implements Runnable,MouseListener{
 
     private Observer os; // create observer in this class
 
+    private Score v_score; // this will crate the score class for printout graphically
+    
+
 
     public Game() throws IOException {
         addMouseListener(this);
+        this.v_score = new Score(); // initiallize score for view
         // initialize the board first
         init();
     }
@@ -95,19 +99,8 @@ public class Game extends Canvas implements Runnable,MouseListener{
             e.printStackTrace();
         }
 
-        // initialize the block
-        for(int i = 0;i < 6;i++){
-            for(int j = 0;j < 6;j++){
-                int  n = rand.nextInt(4) + 1;
-                Block b = new Block(j,i,n);
-                board[i][j] = b;
-                b.setSlidepoint(new Point(b.getX(),b.getY()));
-            }
-        }
+        os = new Observer(board,v_score); // Create observer that use to manipulate the view
 
-        os = new Observer(board); // Create observer that use to manipulate the view
-        //os.movePosition(0,0,0,5);
-        //os.movePosition(0,5,0,0);
     }
 
     // THe main controller of our thread
@@ -188,7 +181,7 @@ public class Game extends Canvas implements Runnable,MouseListener{
             frames++;
             if(System.currentTimeMillis() - timer > 1000){
                 timer += 1000;
-                System.out.println(updates + " Ticks,Fps " + frames);
+                //System.out.println(updates + " Ticks,Fps " + frames);
                 updates = 0;
                 frames = 0;
             }
@@ -211,6 +204,13 @@ public class Game extends Canvas implements Runnable,MouseListener{
         Graphics g = bs.getDrawGraphics();
         g.drawImage(image, 0, 0, getWidth(), getHeight(), this);
         g.drawImage(background, 0, 0, this);
+
+        // set the graphic for printout the score
+        Graphics2D g2 = (Graphics2D)g;
+        g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING,
+                RenderingHints.VALUE_ANTIALIAS_ON);
+        g2.setColor(Color.WHITE);
+        g2.drawString("Score: " + v_score.getScore(),70,20); //print out the score
         // --
 
         // loop through the block in the board
@@ -253,32 +253,6 @@ public class Game extends Canvas implements Runnable,MouseListener{
         bs.show();
     }
 
-//    private void boardUpdate() {
-//
-//            if(isSwitch == 1) {
-//                switchOrigin = board[getMouseYpos][getMouseXpos];
-//                oldXpos = getMouseXpos;
-//                oldYpos = getMouseYpos;
-//            }else if(isSwitch == 2){
-//                getSwitchDes = board[getMouseYpos][getMouseXpos];
-//                switchOrigin.setSlidepoint(new Point(getSwitchDes.getX(),getSwitchDes.getY()));
-//                getSwitchDes.setSlidepoint(new Point(switchOrigin.getX(),switchOrigin.getY()));
-////                //switchSelect = true;
-//                Block tmp;
-//                tmp = board[oldYpos][oldXpos];
-//                board[oldYpos][oldXpos] = board[getMouseYpos][getMouseXpos];
-//                board[getMouseYpos][getMouseXpos] = tmp;
-//                switchOrigin.setSwitchtrig(true);
-//                getSwitchDes.setSwitchtrig(true);
-//                isSwitch = 0;
-//            }
-//
-//        for(int i = 0;i < 6;i++){
-//            for(int j = 0;j < 6;j++){
-//                board[i][j].tick();
-//            }
-//        }
-//    }
 
     public void mouseClicked(MouseEvent e) {
 
@@ -346,13 +320,13 @@ public class Game extends Canvas implements Runnable,MouseListener{
                     if (b.getX() - 20 < des.x) {
                         b.setVelX(-(b.getX() - des.x));
                     } else {
-                        b.setVelX(-20);
+                        b.setVelX(-1);
                     }
                 } else if (b.getX() < des.x) {
                     if (b.getX() + 20 > des.x) {
                         b.setVelX(des.x - b.getX());
                     } else {
-                        b.setVelX(20);
+                        b.setVelX(1);
                     }
                 } else if(b.getX() == des.x){
                     b.setVelX(0);
@@ -364,13 +338,13 @@ public class Game extends Canvas implements Runnable,MouseListener{
                     if (b.getY() - 20 < des.y) {
                         b.setVelY(-(b.getY() - des.y));
                     } else {
-                        b.setVelY(-20);
+                        b.setVelY(-1);
                     }
                 } else if (b.getY() < des.y) {
                     if (b.getY() + 20 > des.y) {
                         b.setVelY(des.y - b.getY());
                     } else {
-                        b.setVelY(20);
+                        b.setVelY(1);
                     }
                 } else if(b.getY() == des.y){
                     b.setVelY(0);
