@@ -1,6 +1,7 @@
 package com.muic.game;
 
 import com.muic.game.candy.Block;
+import com.muic.game.candy.BoardModel;
 import com.muic.game.candy.Point;
 import com.muic.game.logic.Score;
 
@@ -8,21 +9,20 @@ import java.awt.*;
 import java.util.ArrayList;
 import java.util.Random;
 
-// This will create the observer for the board logic for communication to view
+// This will create the observer for the board model for communication to view
 
 public class Observer {
 
-    Block[][] board;
-    Score v_score; // this is the score of view board
+    BoardModel md;
 
-    public Observer(Block[][] board, Score score){
-
-        this.board = board;
-        this.v_score = score;
+    public Observer(BoardModel md){
+        // Create observer toward model
+        this.md = md;
+        md.addObserver(this);
     }
 
     // This will create random cell and have transition from the upper
-    public void randomBlock(int row,int col){
+    public void randomBlock(Block[][] board,int row,int col){
 
         Random r = new Random();
 
@@ -42,7 +42,7 @@ public class Observer {
     }
 
     // Move the candy from one position to another
-    public void movePosition(int ori_row,int ori_col,int des_row,int des_col){
+    public void movePosition(Block[][] board,int ori_row,int ori_col,int des_row,int des_col){
 
 
         // Just a way to get the position from specific row and col
@@ -65,11 +65,11 @@ public class Observer {
     }
 
     //set specific block to null or not null
-    public void setNull(int row,int col,boolean b){
+    public void setNull(Block[][] board,int row,int col,boolean b){
         board[row][col].setNull(b);
     }
 
-    public void setValue(int row,int col,int value){
+    public void setValue(Block[][] board,int row,int col,int value){
 
         // Create an instance of block
         Block b = new Block(col,row,value);
@@ -81,10 +81,8 @@ public class Observer {
         board[row][col].setSlidepoint(new Point(b.getX(),b.getY()));
     }
 
-    public void setScore(Score score){
+    public void setScore(Score score,Score v_score){
         v_score.setScore(score.getScore());
     }
-
-
 
 }

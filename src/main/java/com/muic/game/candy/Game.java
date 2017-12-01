@@ -1,10 +1,9 @@
 package com.muic.game.candy;
 //update this one
 import com.muic.game.Observer;
-import com.muic.game.logic.ModBoard;
+import com.muic.game.logic.LogicBoard;
 import com.muic.game.logic.Score;
 
-import javax.swing.*;
 import java.awt.*;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
@@ -12,6 +11,8 @@ import java.awt.image.BufferStrategy;
 import java.awt.image.BufferedImage;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.Random;
 
 public class Game extends Canvas implements Runnable,MouseListener{
@@ -48,15 +49,38 @@ public class Game extends Canvas implements Runnable,MouseListener{
     private int des_col = -1;
     private int cmd_count = 1; // this will help to distinguis wether the press is for origin or destination
 
-    private Observer os; // create observer in this class
 
     private Score v_score; // this will crate the score class for printout graphically
+
+    private BoardModel mb; // Board model
+    private Observer os; //Observer one
+    private LogicBoard lb; // the logic of logicBoard
+
+    private Map<Integer,BufferedImage> imgGet; //use for setPosition(); to reduce if statement
     
 
 
     public Game() throws IOException {
         addMouseListener(this);
         this.v_score = new Score(); // initiallize score for view
+
+        //create observer and boardModel which we will assign boardModel to logic
+        mb = new BoardModel();
+        os = new Observer(mb);
+        lb = new LogicBoard(mb);
+
+        // instantiate the hashmap to use it when setPosition();
+        this.imgGet = new HashMap<Integer, BufferedImage>();
+        imgGet.put(1,red);
+        imgGet.put(2,blue);
+        imgGet.put(3,green);
+        imgGet.put(4,yellow);
+        imgGet.put(5,brown);
+        imgGet.put(6,purple);
+
+        //init the board
+        lb.initBoard();
+
         // initialize the board first
         init();
     }
@@ -99,94 +123,85 @@ public class Game extends Canvas implements Runnable,MouseListener{
             e.printStackTrace();
         }
 
-        os = new Observer(board,v_score); // Create observer that use to manipulate the view
+        //os = new Observer(board,v_score); // Create observer that use to manipulate the view
 
     }
 
     // THe main controller of our thread
     public void run() {
 
-        // -- Manipulating the Frame rate thingy --
-        long lastTime = System.nanoTime();
-        final double amoutOfTicks = 60.0;
-        double ns = 1000000000 / amoutOfTicks;
-        double delta = 0;
-        int updates = 0;
-        int frames = 0;
-        long timer = System.currentTimeMillis();
-        // ----
-
-        // Implement the board that use for logic for testing we need to fix the design pattern in this
-        ArrayList<Integer>[][] boardLogic = new ArrayList[6][6];
-        // We need to use modboard class to manipulate the logicBoard
-        ModBoard mb = new ModBoard(os);
-        mb.initBoard(boardLogic);
-
-        //implement the score for testing
-        Score score = new Score();
-        printBoard(score,boardLogic);// print out the board
-
-        // the main loop
-        while(running){
-            long now = System.nanoTime();
-            delta += (now - lastTime) / ns;
-            lastTime = now;
-            if(delta >= 1){
-                //boardUpdate();
-
-                // if we detect any press we will use this if
-                if(getMouseXpos != -1 && getMouseYpos != -1){
-                    System.out.println("you press on row " + getMouseYpos + " column" + getMouseXpos);
-                    int buffer_row = getMouseYpos; // use to keep the row and col from pressing
-                    int buffer_col = getMouseXpos;
-                    getMouseXpos = -1; // print out and set it back to -1
-                    getMouseYpos = -1;
-
-                    // if cmd_count = 2 we will start to mod since we gather all of origin and destination
-                    if(cmd_count == 2){
-                        des_row = buffer_row; // assign buffer to destination
-                        des_col = buffer_col;
-
-                        //if the board switch sucessfully we will print out the result and do dupcheck else we print error
-                        if(mb.swapBoard(boardLogic,origin_row,origin_col,des_row,des_col)){
-                            mb.dupCheck(boardLogic,score);
-                            System.out.println("==============================================");
-                            printBoard(score,boardLogic);// print out the board
-                        }
-
-                        cmd_count = 1;
-                    }else {
-                        origin_row = buffer_row; // assign buffer to origin
-                        origin_col = buffer_col;
-                        cmd_count++;
-                    }
-                }
-                updates++;
-                delta--;
-            }
-            try {
-
-                // tick will help to add or subtract to the position of the block
-                for(int i = 0;i < 6;i++){
-                    for(int j = 0;j < 6;j++){
-                        board[i][j].tick();
-                }
-        }
-
-                // render the board
-                render();
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
-            frames++;
-            if(System.currentTimeMillis() - timer > 1000){
-                timer += 1000;
-                //System.out.println(updates + " Ticks,Fps " + frames);
-                updates = 0;
-                frames = 0;
-            }
-        }
-        stop();
+//        // -- Manipulating the Frame rate thingy --
+//        long lastTime = System.nanoTime();
+//        final double amoutOfTicks = 60.0;
+//        double ns = 1000000000 / amoutOfTicks;
+//        double delta = 0;
+//        int updates = 0;
+//        int frames = 0;
+//        long timer = System.currentTimeMillis();
+//        printBoard(mb.getScore(),mb.getBoard());// print out the board
+//
+//        // the main loop
+//        while(running){
+//            long now = System.nanoTime();
+//            delta += (now - lastTime) / ns;
+//            lastTime = now;
+//            if(delta >= 1){
+//                //boardUpdate();
+//
+//                // if we detect any press we will use this if
+//                if(getMouseXpos != -1 && getMouseYpos != -1){
+//                    System.out.println("you press on row " + getMouseYpos + " column" + getMouseXpos);
+//                    int buffer_row = getMouseYpos; // use to keep the row and col from pressing
+//                    int buffer_col = getMouseXpos;
+//                    getMouseXpos = -1; // print out and set it back to -1
+//                    getMouseYpos = -1;
+//
+//                    // if cmd_count = 2 we will start to mod since we gather all of origin and destination
+//                    if(cmd_count == 2){
+//                        des_row = buffer_row; // assign buffer to destination
+//                        des_col = buffer_col;
+//
+//                        //if the board switch sucessfully we will print out the result and do dupcheck else we print error
+//                        if(lb.swapBoard(origin_row,origin_col,des_row,des_col)){
+//                            lb.dupCheck();
+//                            System.out.println("==============================================");
+//                            printBoard(mb.getScore(),mb.getBoard());// print out the board
+//                        }
+//
+//                        cmd_count = 1;
+//                    }else {
+//                        origin_row = buffer_row; // assign buffer to origin
+//                        origin_col = buffer_col;
+//                        cmd_count++;
+//                    }
+//                }
+//                updates++;
+//                delta--;
+//            }
+//            try {
+//
+//                // tick will help to add or subtract to the position of the block
+//                for(int i = 0;i < 6;i++){
+//                    for(int j = 0;j < 6;j++){
+//                        mb.getV_board()[i][j].tick();
+//                        //board[i][j].tick();
+//                }
+//        }
+//
+//                // render the board
+//                render();
+//            } catch (IOException e) {
+//                e.printStackTrace();
+//            }
+//            frames++;
+//            if(System.currentTimeMillis() - timer > 1000){
+//                timer += 1000;
+//                //System.out.println(updates + " Ticks,Fps " + frames);
+//                updates = 0;
+//                frames = 0;
+//            }
+//        }
+//        stop();
     }
 
     // Use for render the graphic
@@ -216,33 +231,10 @@ public class Game extends Canvas implements Runnable,MouseListener{
         // loop through the block in the board
         for(int i = 0;i<6;i++){
             for(int j = 0;j<6;j++){
-                Block b = board[i][j];
+                Block b = mb.getV_board()[i][j];
                 // if the block is exist we set the position to it
                 if(!b.isNull()) {
-                    if (b.getValue() == 1) {
-                        // set position to it
-                        setPosition(g, b, red);
-                    }
-                    if (b.getValue() == 2) {
-                        // set position to it
-                        setPosition(g, b, blue);
-                    }
-                    if (b.getValue() == 3) {
-                        // set position to it
-                        setPosition(g, b, green);
-                    }
-                    if (b.getValue() == 4) {
-                        // set position to it
-                        setPosition(g, b, yellow);
-                    }
-                    if (b.getValue() == 5) {
-                        // set position to it
-                        setPosition(g, b, brown);
-                    }
-                    if (b.getValue() == 6) {
-                        // set position to it
-                        setPosition(g, b, purple);
-                    }
+                    setPosition(g,b,imgGet.get(b.getValue()));
                 }
             }
 
@@ -255,6 +247,8 @@ public class Game extends Canvas implements Runnable,MouseListener{
 
 
     public void mouseClicked(MouseEvent e) {
+
+        System.out.println("click already");
 
     }
 

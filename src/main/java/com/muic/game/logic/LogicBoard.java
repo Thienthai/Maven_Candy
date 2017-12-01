@@ -1,6 +1,7 @@
 package com.muic.game.logic;
 
 import com.muic.game.Observer;
+import com.muic.game.candy.BoardModel;
 
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -8,27 +9,30 @@ import java.io.InputStreamReader;
 import java.util.ArrayList;
 import java.util.Random;
 
-public class ModBoard {
+public class LogicBoard {
 
     Random r = new Random();
 
-    Observer os; // Create observer variable to this class
+    BoardModel md; // Create observer variable to this class
+    ArrayList<Integer>[][] board; //board for logic
+    Score score; //Score for logic
 
-    public ModBoard(Observer os){
-        this.os = os;
+    public LogicBoard(BoardModel md){
+        this.md = md;
+        this.board = md.getBoard();
+        this.score = md.getScore();
     }
 
     // Initiallize the board when started
-    public void initBoard(ArrayList<Integer>[][] board){
-
-
+    public void initBoard(){
+        Random r = new Random();
 
         for(int i = 0 ;i < 6;i++){
             for(int j = 0;j < 6;j++){
                 board[i][j] = new ArrayList<Integer>();
                 int num = r.nextInt(4) + 1;
                 board[i][j].add(num);
-                os.setValue(i,j,num); // set value of view board
+                md.notifyObserver_setValue(i,j,num);
             }
         }
 
@@ -57,7 +61,7 @@ public class ModBoard {
                         num = r.nextInt(4)+1;
                     }
                     board[i][j].add(num); // assign the random new one
-                    os.setValue(i,j,num); // set value of view board
+                    md.notifyObserver_setValue(i,j,num);
 
                 }
 
@@ -88,23 +92,21 @@ public class ModBoard {
                         num = r.nextInt(4)+1;
                     }
                     board[i][j].add(num); // create the new random one
-                    os.setValue(i,j,num); // set value of view board
-
+                    md.notifyObserver_setValue(i,j,num);
                 }
 
             }
         }
 
         //use is_dup to check if it have dup so we still to reinitialize it
-        if(isDup(board)){
+        if(isDup()){
             System.out.println("still dup");
-            initBoard(board);
+            initBoard();
         }
-
     }
 
     //Make the block to be 0 for fall testing purpose
-    public void setNullCandy(ArrayList<Integer>[][] board){
+    public void setNullCandy(){
 
         board[1][1].clear();
         board[1][1].add(0);
@@ -118,7 +120,7 @@ public class ModBoard {
     }
 
     //Set the falling position from the null cell
-    public void fallSet(ArrayList<Integer>[][] board){
+    public void fallSet(){
 
         boolean is_full = false; // For checking that if we have unfinished null block
 
@@ -142,9 +144,12 @@ public class ModBoard {
                         //set the upper position to be equal to 0
                         board[i - 1][j].clear();
                         board[i - 1][j].add(0);
-                        os.setNull(i,j,false);
-                        os.setNull(i-1,j,false);
-                        os.movePosition(i,j,i-1,j);
+                        md.notifyObserver_setNull(i,j,false);
+                        md.notifyObserver_setNull(i-1,j,false);
+                        md.notifyObserver_movepos(i,j,i-1,j);
+//                        os.setNull(i,j,false);
+//                        os.setNull(i-1,j,false);
+//                        os.movePosition(i,j,i-1,j);
 
                     }
 
@@ -157,8 +162,8 @@ public class ModBoard {
                         board[i][j].clear();
                         int num = r.nextInt(4) + 1; // random new number
                         board[i][j].add(num);
-                        os.setNull(i,j,false);
-                        os.setValue(i,j,num);
+                        md.notifyObserver_setNull(i,j,false);
+                        md.notifyObserver_setValue(i,j,num);
 
                     }
 
@@ -168,7 +173,7 @@ public class ModBoard {
     }
 
     //Check the duplication more than 3 cell
-    public void dupCheck(ArrayList<Integer>[][] board,Score score){
+    public void dupCheck(){
         boolean dup_complete = false; // use to check if we complete dup check or not
 
         while(!dup_complete) {
@@ -203,7 +208,8 @@ public class ModBoard {
                     // we will start to set null if more than or equal to three
                     if (dup_num >= 3) {
                         score.setScore(score.getScore() + 100); // adding the score when we see duplication
-                        os.setScore(score); // use to set score for view class
+                        md.notifyObserver_setScore();
+                        //os.setScore(score); // use to set score for view class
 
                         dup_complete = false; // see dup occur so we still not complete
 
@@ -211,7 +217,7 @@ public class ModBoard {
                         {
                             col_Board[i - ((dup_num - k) - 1)][j].clear();
                             col_Board[i - ((dup_num - k) - 1)][j].add(0);
-                            os.setNull(i - ((dup_num - k) - 1),j,true);
+                            md.notifyObserver_setNull(i - ((dup_num - k) - 1),j,true);
                         }
                     }
                 }
@@ -244,14 +250,15 @@ public class ModBoard {
                     // we will start to set null if more than or equal to three
                     if (dup_num >= 3) {
                         score.setScore(score.getScore() + 100); // adding the score when we see duplication
-                        os.setScore(score); // use to set score for view class
+                        //os.setScore(score); // use to set score for view class
+                        md.notifyObserver_setScore();
                         dup_complete = false; // see dup occur so we still not complete
 
                         for (int k = 0; k < dup_num; k++) //loop back to the previous dup_num times and set it all to 0
                         {
                             row_Board[i][j - ((dup_num - k) - 1)].clear();
                             row_Board[i][j - ((dup_num - k) - 1)].add(0);
-                            os.setNull(i,j - ((dup_num - k) - 1),true);
+                            md.notifyObserver_setNull(i,j - ((dup_num - k) - 1),true);
                         }
                     }
                 }
@@ -271,7 +278,7 @@ public class ModBoard {
                 }
             }
             printBoard(board,score);
-            fallSet(board); // set the null block so the board will be full for check again next round
+            fallSet(); // set the null block so the board will be full for check again next round
 
         }
     }
@@ -289,7 +296,7 @@ public class ModBoard {
     }
 
     //swap the cell from origin to destination
-    public boolean swapBoard(ArrayList<Integer>[][] board,int origin_row, int origin_col,int des_row,int des_col){
+    public boolean swapBoard(int origin_row, int origin_col,int des_row,int des_col){
 
         // list of position of origin is possible
         boolean false1 = (origin_col == des_col && origin_row == des_row + 1);
@@ -319,10 +326,10 @@ public class ModBoard {
         board[des_row][des_col].add(bufferInt_Origin);
 
         // change the board view
-        os.movePosition(origin_row,origin_col,des_row,des_col);
+        md.notifyObserver_movepos(origin_row,origin_col,des_row,des_col);
 
         // if it true either one of the four the position is legit else it is not and we will not swap
-        if((false1 || false2 || false3 || false4) && isDup(board)){
+        if((false1 || false2 || false3 || false4) && isDup()){
             return true;
         }else {
             System.out.println("FALSE POSITION OR NO POSITION OCCUR NO SWAP");
@@ -335,13 +342,14 @@ public class ModBoard {
             // swap the candy
             board[origin_row][origin_col].add(bufferInt_Origin);
             board[des_row][des_col].add(bufferInt_Des);
-            os.movePosition(origin_row,origin_col,des_row,des_col); // move back to the previous position
+            //os.movePosition(origin_row,origin_col,des_row,des_col); // move back to the previous position
+            md.notifyObserver_movepos(origin_row,origin_col,des_row,des_col);
             return false;
         }
     }
 
     // To check is it have duplication in the board or not
-    public boolean isDup(ArrayList<Integer>[][] board){
+    public boolean isDup(){
 
         boolean isDup = false;
 
@@ -398,22 +406,22 @@ public class ModBoard {
         return isDup;
 
     }
-
-    public void testCase(ArrayList<Integer>[][] board){
-
-        for(int i = 0; i < 6; i++){
-            for(int j = 0;j < 6; j++){
-
-            }
-        }
-
-        board[0][0].add(1);
-        board[1][0].add(1);
-        board[2][1].add(1);
-        board[3][0].add(1);
-
-
-    }
+//
+//    public void testCase(ArrayList<Integer>[][] board){
+//
+//        for(int i = 0; i < 6; i++){
+//            for(int j = 0;j < 6; j++){
+//
+//            }
+//        }
+//
+//        board[0][0].add(1);
+//        board[1][0].add(1);
+//        board[2][1].add(1);
+//        board[3][0].add(1);
+//
+//
+//    }
 
     //print out the board
     public void printBoard(ArrayList<Integer>[][] board,Score score){ // print to check the board candy
