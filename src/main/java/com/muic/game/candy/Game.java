@@ -130,78 +130,78 @@ public class Game extends Canvas implements Runnable,MouseListener{
     // THe main controller of our thread
     public void run() {
 
-//        // -- Manipulating the Frame rate thingy --
-//        long lastTime = System.nanoTime();
-//        final double amoutOfTicks = 60.0;
-//        double ns = 1000000000 / amoutOfTicks;
-//        double delta = 0;
-//        int updates = 0;
-//        int frames = 0;
-//        long timer = System.currentTimeMillis();
-//        printBoard(mb.getScore(),mb.getBoard());// print out the board
-//
-//        // the main loop
-//        while(running){
-//            long now = System.nanoTime();
-//            delta += (now - lastTime) / ns;
-//            lastTime = now;
-//            if(delta >= 1){
-//                //boardUpdate();
-//
-//                // if we detect any press we will use this if
-//                if(getMouseXpos != -1 && getMouseYpos != -1){
-//                    System.out.println("you press on row " + getMouseYpos + " column" + getMouseXpos);
-//                    int buffer_row = getMouseYpos; // use to keep the row and col from pressing
-//                    int buffer_col = getMouseXpos;
-//                    getMouseXpos = -1; // print out and set it back to -1
-//                    getMouseYpos = -1;
-//
-//                    // if cmd_count = 2 we will start to mod since we gather all of origin and destination
-//                    if(cmd_count == 2){
-//                        des_row = buffer_row; // assign buffer to destination
-//                        des_col = buffer_col;
-//
-//                        //if the board switch sucessfully we will print out the result and do dupcheck else we print error
-//                        if(lb.swapBoard(origin_row,origin_col,des_row,des_col)){
-//                            lb.dupCheck();
-//                            System.out.println("==============================================");
-//                            printBoard(mb.getScore(),mb.getBoard());// print out the board
-//                        }
-//
-//                        cmd_count = 1;
-//                    }else {
-//                        origin_row = buffer_row; // assign buffer to origin
-//                        origin_col = buffer_col;
-//                        cmd_count++;
-//                    }
-//                }
-//                updates++;
-//                delta--;
-//            }
-//            try {
-//
-//                // tick will help to add or subtract to the position of the block
-//                for(int i = 0;i < 6;i++){
-//                    for(int j = 0;j < 6;j++){
-//                        mb.getV_board()[i][j].tick();
-//                        //board[i][j].tick();
-//                }
-//        }
-//
-//                // render the board
-//                render();
-//            } catch (IOException e) {
-//                e.printStackTrace();
-//            }
-//            frames++;
-//            if(System.currentTimeMillis() - timer > 1000){
-//                timer += 1000;
-//                //System.out.println(updates + " Ticks,Fps " + frames);
-//                updates = 0;
-//                frames = 0;
-//            }
-//        }
-//        stop();
+        // -- Manipulating the Frame rate thingy --
+        long lastTime = System.nanoTime();
+        final double amoutOfTicks = 60.0;
+        double ns = 1000000000 / amoutOfTicks;
+        double delta = 0;
+        int updates = 0;
+        int frames = 0;
+        long timer = System.currentTimeMillis();
+        printBoard(mb.getScore(),mb.getBoard());// print out the board
+
+        // the main loop
+        while(running){
+            long now = System.nanoTime();
+            delta += (now - lastTime) / ns;
+            lastTime = now;
+            if(delta >= 1){
+                //boardUpdate();
+
+                // if we detect any press we will use this if
+                if(getMouseXpos != -1 && getMouseYpos != -1){
+                    System.out.println("you press on row " + getMouseYpos + " column" + getMouseXpos);
+                    int buffer_row = getMouseYpos; // use to keep the row and col from pressing
+                    int buffer_col = getMouseXpos;
+                    getMouseXpos = -1; // print out and set it back to -1
+                    getMouseYpos = -1;
+
+                    // if cmd_count = 2 we will start to mod since we gather all of origin and destination
+                    if(cmd_count == 2){
+                        des_row = buffer_row; // assign buffer to destination
+                        des_col = buffer_col;
+
+                        //if the board switch sucessfully we will print out the result and do dupcheck else we print error
+                        if(lb.swapBoard(origin_row,origin_col,des_row,des_col)){
+                            lb.dupCheck();
+                            System.out.println("==============================================");
+                            printBoard(mb.getScore(),mb.getBoard());// print out the board
+                        }
+
+                        cmd_count = 1;
+                    }else {
+                        origin_row = buffer_row; // assign buffer to origin
+                        origin_col = buffer_col;
+                        cmd_count++;
+                    }
+                }
+                updates++;
+                delta--;
+            }
+            try {
+
+                // tick will help to add or subtract to the position of the block
+                for(int i = 0;i < 6;i++){
+                    for(int j = 0;j < 6;j++){
+                        mb.getV_board()[i][j].tick();
+                        //board[i][j].tick();
+                }
+        }
+
+                // render the board
+                render();
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+            frames++;
+            if(System.currentTimeMillis() - timer > 1000){
+                timer += 1000;
+                //System.out.println(updates + " Ticks,Fps " + frames);
+                updates = 0;
+                frames = 0;
+            }
+        }
+        stop();
     }
 
     // Use for render the graphic
